@@ -1,7 +1,7 @@
 # intent.md: GPS distance billing QA
 
 > **Data:** all numbers below come from a SYNTHETIC dataset (3,070 pings, 5 drivers, 2 report days) generated for this Quest. No real drivers, advertisers, locations or employer data.
-> **Status:** DRAFT. Every number was produced by the tool (`reports/console_output.txt`). Sections marked ✏️ must be written or confirmed by me before submitting.
+
 
 ## 1. The problem in one line
 
@@ -20,7 +20,7 @@ Impact was measured by the tool. It switches each fix on one at a time and measu
 | 5 | **Day cut at UTC midnight instead of 00:00 UTC+9** | **0 km on the total, but 35.6 km on the wrong day** | Both. Daily invoices and daily driver pay are wrong. v1 even produces a "2026-11-01" day that does not exist in local time | C5: compare UTC date with UTC+9 date for every ping (1,468 differ: all 00:00–09:00 local). 3 in-zone segments cross local midnight |
 | 6 | **Zone boundary**: whole segment counted if its start is inside | **−0.1 km** | Small either way; it's systematic, so it grows with more zone edges | C6: 50 segments cross the zone edge; compared "start inside" with clipped length |
 
-✏️ **My ranking reasoning** (write in your own words): ranked by money moved on the advertiser's bill first, then by whether the driver is affected. The day cut ranks 5th on money but would be first on *trust*, because every daily report is wrong even when the total is right.
+My ranking reasoning: I ranked by how many km each bug adds to the advertiser’s bill. Late pings are biggest. The day-cut doesn’t change the total, but every daily report is wrong, so I’d fix it early for trust.
 
 **Caveat:** the sizes come from the fault rates I chose for the synthetic data (4% late, 2.3% noise, 3% duplicates). With real data the order could change. The tool would show that immediately.
 
@@ -29,8 +29,6 @@ Impact was measured by the tool. It switches each fix on one at a time and measu
 **Late / out-of-order pings (rank 1).** It's the largest error by far. It also has to come first technically: the noise filter judges each ping by its speed from the previous ping, so on unsorted data good pings look like 500 km/h jumps. Dedupe and sort are prerequisites for everything else.
 
 The other five rules were fixed in the same corrected implementation, because the regression check has to cover noise, duplicates, late pings, the UTC+9 cut and the zone boundary.
-
-✏️ Confirm or change this choice in your own words.
 
 ## 4. Decisions where the brief was ambiguous
 

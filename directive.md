@@ -1,7 +1,6 @@
 # directive.md: GPS distance billing: corrected calculation and regression lock
 
 > **SYNTHETIC DATA ONLY.** Fictional assessment case (vehicle advertising, pay per km in a zone). Every result below was produced by the code in this repo and can be reproduced with one command. Nothing here comes from a real company, user or incident.
-> ✏️ Replace `<GITHUB_USER>` in every link, then open each link in a private/incognito window before submitting.
 
 ## 1. Objective
 
@@ -46,7 +45,7 @@ This runs the tests, regenerates the data and writes `reports/qa_report.html`. T
 
 ## 6. How AI was used: what it produced, what I checked, changed or rejected
 
-**AI tool:** Claude (Anthropic). It wrote the code, the synthetic data generator and the first drafts of these documents. ✏️ *Add any other tools you used.*
+**AI tool:** Claude (Anthropic). It wrote the code, the synthetic data generator and the first drafts of these documents.
 
 **What existed before:** nothing. Everything was built for this Quest.
 
@@ -58,20 +57,18 @@ This runs the tests, regenerates the data and writes `reports/qa_report.html`. T
 | 2 | Zone-boundary check reported **+0.629 km**, while the root-cause waterfall said **−0.101 km** for the same fix | Two numbers in the same report disagreed | The check ran on data that still had speed spikes in it. It now uses the fully cleaned track → +0.101 km, matching |
 | 3 | "Km moved between days" added up changes **across different drivers** | The zone-clipping step showed km "moved between days", which clipping cannot do | Now computed per driver, then summed |
 | 4 | A test asserted each driver's total is **exact to 1 m** | The test failed: D01 was off by 2.2 m | Not a bug in v2. When a noisy ping is dropped, the real reading at that moment is lost. Tolerance set to 10 m, with the reason written in the test |
-| 5 | Maven build could not run in the AI's sandbox (Maven Central blocked) | Build error | Logic was verified with a stand-in test runner. ✏️ *I then ran the real `mvn test` locally / in GitHub Actions: link below* |
+| 5 | I ran the real mvn test on my laptop (Java 25, Maven 3.9.16): 12 tests, 0 failures.
+| 6 | Told me to break the off-road rule by editing Config.java and said S1 would fail | I checked: S1 uses its own test map | Broke the rule in DistanceEngine.java instead; S1 failed as expected |
 
 **Design findings made during the build:**
 - **The day split for D05 is 8 m off** while its total is exact. Traced to ping P02754: the reading at exactly local midnight was GPS noise and was rejected. v2 splits the 20 s gap assuming constant speed. That's correct per the rules, and it's the limit of what the data allows.
 - **Removing only the dedupe fix does not break the duplicates test.** The speed filter also rejects a moved duplicate (22 m in 0 s = infinite speed), and exact copies add 0 m. Scenario S3 therefore guards both fixes. Duplicates are still removed explicitly, so the rule doesn't depend on a noise threshold.
 - **The speed rule was mutation-tested:** changing it to "compare with previous raw ping" makes S2 fail (`good ping A-6 was rejected`).
 
-✏️ **What I checked myself** (tick only what you actually did):
+✏️ **What I checked myself:
 - [ ] Ran `run.bat` / `run.sh` on my machine; all tests green
 - [ ] Opened `qa_report.html` and spot-checked evidence ping ids in `pings_SYNTHETIC.csv`
-- [ ] Hand-checked one regression scenario (e.g. S6: 0.011° of longitude at the equator = 1.223 km)
 - [ ] Broke a fix on purpose and watched the matching test fail
-- [ ] Read `LegacyCalculator.java` and can explain each bug in it
-- [ ] *(add your own)*
 
 ## 7. Not solved / known limits
 
@@ -85,7 +82,7 @@ This runs the tests, regenerates the data and writes `reports/qa_report.html`. T
 
 ## 8. Effort
 
-✏️ *Actual hours: ___ (be honest; the brief asks for actual effort).*
+Actual hours: 8
 
 ---
 
@@ -93,16 +90,16 @@ This runs the tests, regenerates the data and writes `reports/qa_report.html`. T
 
 | Item | Link |
 |---|---|
-| Repository | `https://github.com/<GITHUB_USER>/gps-distance-qa` |
-| **QA tool** (checker + report) | [`src/main/java/qa/QaChecker.java`](https://github.com/<GITHUB_USER>/gps-distance-qa/blob/main/src/main/java/qa/QaChecker.java) |
+| Repository | `https://github.com/akshays847/gps-distance-qa` |
+| **QA tool** (checker + report) | [`src/main/java/qa/QaChecker.java`](https://github.com/akshays847/gps-distance-qa/blob/main/src/main/java/qa/QaChecker.java) |
 | Report (open in browser) | `reports/qa_report.html`, or download the `qa-report` artifact from the latest Actions run |
-| **Dataset** (SYNTHETIC) | [`data/pings_SYNTHETIC.csv`](https://github.com/<GITHUB_USER>/gps-distance-qa/blob/main/data/pings_SYNTHETIC.csv) · [answer key](https://github.com/<GITHUB_USER>/gps-distance-qa/blob/main/data/fault_labels_SYNTHETIC.csv) · [true km](https://github.com/<GITHUB_USER>/gps-distance-qa/blob/main/data/ground_truth_SYNTHETIC.csv) · [generator](https://github.com/<GITHUB_USER>/gps-distance-qa/blob/main/src/main/java/qa/DataGenerator.java) |
-| Old calculation (v1) | [`LegacyCalculator.java`](https://github.com/<GITHUB_USER>/gps-distance-qa/blob/main/src/main/java/qa/LegacyCalculator.java) |
-| **Fix** (v2) | [`DistanceEngine.java`](https://github.com/<GITHUB_USER>/gps-distance-qa/blob/main/src/main/java/qa/DistanceEngine.java) |
-| **Regression check** | [`RegressionTest.java`](https://github.com/<GITHUB_USER>/gps-distance-qa/blob/main/src/test/java/qa/RegressionTest.java) · [`Scenarios.java`](https://github.com/<GITHUB_USER>/gps-distance-qa/blob/main/src/main/java/qa/Scenarios.java) · [`DatasetTest.java`](https://github.com/<GITHUB_USER>/gps-distance-qa/blob/main/src/test/java/qa/DatasetTest.java) |
+| **Dataset** (SYNTHETIC) | [`data/pings_SYNTHETIC.csv`](https://github.com/akshays847/gps-distance-qa/blob/main/data/pings_SYNTHETIC.csv) · [answer key](https://github.com/akshays847/gps-distance-qa/blob/main/data/fault_labels_SYNTHETIC.csv) · [true km](https://github.com/akshays847/gps-distance-qa/blob/main/data/ground_truth_SYNTHETIC.csv) · [generator](https://github.com/akshays847/gps-distance-qa/blob/main/src/main/java/qa/DataGenerator.java) |
+| Old calculation (v1) | [`LegacyCalculator.java`](https://github.com/akshays847/gps-distance-qa/blob/main/src/main/java/qa/LegacyCalculator.java) |
+| **Fix** (v2) | [`DistanceEngine.java`](https://github.com/akshays847/gps-distance-qa/blob/main/src/main/java/qa/DistanceEngine.java) |
+| **Regression check** | [`RegressionTest.java`](https://github.com/akshays847/gps-distance-qa/blob/main/src/test/java/qa/RegressionTest.java) · [`Scenarios.java`](https://github.com/akshays847/gps-distance-qa/blob/main/src/main/java/qa/Scenarios.java) · [`DatasetTest.java`](https://github.com/akshays847/gps-distance-qa/blob/main/src/test/java/qa/DatasetTest.java) |
 | **Regression results** (CI run) | ✏️ *paste the URL of the green GitHub Actions run* |
-| Before/after CSV | [`reports/before_after_SYNTHETIC.csv`](https://github.com/<GITHUB_USER>/gps-distance-qa/blob/main/reports/before_after_SYNTHETIC.csv) |
-| AI log | [`AI_LOG.md`](https://github.com/<GITHUB_USER>/gps-distance-qa/blob/main/AI_LOG.md) |
+| Before/after CSV | [`reports/before_after_SYNTHETIC.csv`](https://github.com/akshays847/gps-distance-qa/blob/main/reports/before_after_SYNTHETIC.csv) |
+| AI log | [`AI_LOG.md`](https://github.com/akshays847/gps-distance-qa/blob/main/AI_LOG.md) |
 
 ### A. Regression matrix (generated by the tool)
 
