@@ -97,7 +97,7 @@ Actual hours: 8
 | Old calculation (v1) | [`LegacyCalculator.java`](https://github.com/akshays847/gps-distance-qa/blob/main/src/main/java/qa/LegacyCalculator.java) |
 | **Fix** (v2) | [`DistanceEngine.java`](https://github.com/akshays847/gps-distance-qa/blob/main/src/main/java/qa/DistanceEngine.java) |
 | **Regression check** | [`RegressionTest.java`](https://github.com/akshays847/gps-distance-qa/blob/main/src/test/java/qa/RegressionTest.java) · [`Scenarios.java`](https://github.com/akshays847/gps-distance-qa/blob/main/src/main/java/qa/Scenarios.java) · [`DatasetTest.java`](https://github.com/akshays847/gps-distance-qa/blob/main/src/test/java/qa/DatasetTest.java) |
-| **Regression results** (CI run) | ✏️ *paste the URL of the green GitHub Actions run* |
+| **Regression results** (CI run) | https://github.com/akshays847/gps-distance-qa/actions
 | Before/after CSV | [`reports/before_after_SYNTHETIC.csv`](https://github.com/akshays847/gps-distance-qa/blob/main/reports/before_after_SYNTHETIC.csv) |
 | AI log | [`AI_LOG.md`](https://github.com/akshays847/gps-distance-qa/blob/main/AI_LOG.md) |
 
