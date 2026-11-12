@@ -1,0 +1,50 @@
+name: GPS distance QA
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      # Regression tests: each asserts v2 PASSES, v1 FAILS, and v2-minus-that-fix FAILS
+      - name: Regression + dataset tests
+        run: mvn -B test
+
+      - name: Generate synthetic data and run the QA tool
+        run: |
+          java -cp target/classes qa.DataGenerator data
+          java -cp target/classes qa.QaChecker | tee reports/console_output.txt
+
+      - name: Publish results to the run summary
+        if: always()
+        run: |
+          {
+            echo '## GPS distance QA (SYNTHETIC data)'
+            echo
+            cat reports/regression_matrix.md
+            echo
+            echo '### QA tool output'
+            echo '```'
+            cat reports/console_output.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-report
+          path: |
+            reports/
+            target/surefire-reports/

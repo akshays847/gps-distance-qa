@@ -1,0 +1,68 @@
+
+GPS DISTANCE QA  -  3070 pings  (SYNTHETIC DATA)
+====================================================================================================
+1. DATA CHECKS
+  [C1] Duplicate pings (same driver + timestamp)             92
+       92 extra rows (39 exact copies, 53 with different coordinates). v1 counts them all.
+  [C2] Late / out-of-order pings                            121
+       121 pings arrived after a newer ping (latest 39 min late). In arrival order v1 jumps back and forth: ~572.7 km of jump-back lines (before zone filter).
+  [C3] GPS noise: more than 100 m off the road               33
+       33 pings off the road (worst 484 m). v1 uses them.
+  [C4] GPS noise: implied speed above 150 km/h               31
+       31 pings imply >150 km/h vs the last valid ping. A naive check vs the previous ping flags 62 - it would also throw away 31 good pings.
+  [C5] Day cut: UTC date vs report date (00:00 UTC+9)      1468
+       1468 pings fall on a different date in UTC than in UTC+9 (everything 00:00-09:00 local). 3 in-zone segments cross local midnight. v1 books by UTC date.
+  [C6] Zone boundary: segments crossing the zone edge        50
+       50 segments cross the zone edge. v1 counts a whole segment if its start is inside: 149.042 km vs 148.942 km clipped (+0.101 km).
+  [C7] Distance formula: flat degrees vs great-circle         1
+       On the same in-zone segments v1's flat-degree formula gives 170.25 km vs 152.54 km haversine (+11.6%). Longitude degrees are treated as 111 km; at 37.5N they are 88 km.
+
+2. ROOT CAUSE  (fixes switched on one at a time; engine-with-no-fixes == v1: YES)
+  Step                                                      Total km     Change      Moved day
+  v1 (no fixes)                                              487.975     +0.000          0.000
+  + Duplicates counted once                                  476.680    -11.295          0.000
+  + Late / out-of-order pings placed by own timestamp        203.361   -273.319          0.000
+  + GPS noise: >100 m off road ignored                       196.754     -6.607          0.000
+  + GPS noise: >150 km/h ignored                             166.230    -30.524          0.000
+  + Correct distance formula                                 149.042    -17.188          0.000
+  + Only distance inside the zone                            148.942     -0.101          0.163
+  + Day cut at 00:00 UTC+9                                   148.942     +0.000         35.592
+
+3. BEFORE / AFTER per driver per day (km)
+  Driver / day           v1 old   v2 fixed       true    v2 - true
+  D01 2026-11-01          6.904      0.000      0.000       +0.000
+  D01 2026-11-02         61.527     17.308     17.309       -0.001
+  D01 2026-11-03         33.383     12.536     12.537       -0.001
+  D02 2026-11-01         21.141      0.000      0.000       +0.000
+  D02 2026-11-02         63.502     17.871     17.871       -0.000
+  D02 2026-11-03         12.992     11.905     11.905       -0.000
+  D03 2026-11-01         20.436      0.000      0.000       +0.000
+  D03 2026-11-02         82.021     15.207     15.207       -0.000
+  D03 2026-11-03         33.387     14.592     14.591       +0.000
+  D04 2026-11-01          7.472      0.000      0.000       +0.000
+  D04 2026-11-02         53.103     17.841     17.841       +0.000
+  D04 2026-11-03         12.089     11.887     11.887       -0.000
+  D05 2026-11-01         13.813      0.000      0.000       +0.000
+  D05 2026-11-02         50.210     15.388     15.380       +0.008
+  D05 2026-11-03         15.994     14.408     14.416       -0.008
+  TOTAL                 487.975    148.942    148.945
+
+4. ANSWER KEY  (fault type / injected / handled correctly / missed)
+  OFF_ROAD                                          33     33   -
+  SPEED_SPIKE                                       31     31   -
+  DUPLICATE                                         92     92   -
+  LATE (should be KEPT, re-ordered)                121    121   -
+  Rejected but NOT faulted (false positives)         -      0   -
+
+5. REGRESSION MATRIX  (expected: v1 FAIL, v2 PASS, v2-minus-fix FAIL)
+  S1 Noise: >100 m off road                 v1:FAIL  v2:PASS  minus-fix:FAIL
+  S2 Noise: >150 km/h                       v1:FAIL  v2:PASS  minus-fix:FAIL
+  S3 Duplicates count once                  v1:FAIL  v2:PASS  minus-fix:FAIL
+  S4 Late pings placed by own timestamp     v1:FAIL  v2:PASS  minus-fix:FAIL
+  S5 Day cut at 00:00 UTC+9                 v1:FAIL  v2:PASS  minus-fix:FAIL
+  S6 Distance only inside the zone          v1:FAIL  v2:PASS  minus-fix:FAIL
+  S7 Correct distance formula (extra)       v1:FAIL  v2:PASS  minus-fix:FAIL
+
+VERDICT: v2 worst driver-day error vs true km = 0.0084 km (tolerance 0.050) -> PASS
+
+Report: /home/claude/gps-distance-qa/reports/qa_report.html

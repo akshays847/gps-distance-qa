@@ -1,0 +1,9 @@
+step,total_km,change_km,km_moved_between_days
+"v1 (no fixes)",487.9749,0.0000,0.0000
+"+ Duplicates counted once",476.6798,-11.2952,0.0000
+"+ Late / out-of-order pings placed by own timestamp",203.3610,-273.3188,0.0000
+"+ GPS noise: >100 m off road ignored",196.7545,-6.6065,0.0000
+"+ GPS noise: >150 km/h ignored",166.2304,-30.5241,0.0000
+"+ Correct distance formula",149.0424,-17.1880,0.0000
+"+ Only distance inside the zone",148.9418,-0.1006,0.1628
+"+ Day cut at 00:00 UTC+9",148.9418,0.0000,35.5922

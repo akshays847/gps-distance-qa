@@ -1,0 +1,8 @@
+check_id,name,count,finding
+C1,"Duplicate pings (same driver + timestamp)",92,"92 extra rows (39 exact copies, 53 with different coordinates). v1 counts them all."
+C2,"Late / out-of-order pings",121,"121 pings arrived after a newer ping (latest 39 min late). In arrival order v1 jumps back and forth: ~572.7 km of jump-back lines (before zone filter)."
+C3,"GPS noise: more than 100 m off the road",33,"33 pings off the road (worst 484 m). v1 uses them."
+C4,"GPS noise: implied speed above 150 km/h",31,"31 pings imply >150 km/h vs the last valid ping. A naive check vs the previous ping flags 62 - it would also throw away 31 good pings."
+C5,"Day cut: UTC date vs report date (00:00 UTC+9)",1468,"1468 pings fall on a different date in UTC than in UTC+9 (everything 00:00-09:00 local). 3 in-zone segments cross local midnight. v1 books by UTC date."
+C6,"Zone boundary: segments crossing the zone edge",50,"50 segments cross the zone edge. v1 counts a whole segment if its start is inside: 149.042 km vs 148.942 km clipped (+0.101 km)."
+C7,"Distance formula: flat degrees vs great-circle",1,"On the same in-zone segments v1's flat-degree formula gives 170.25 km vs 152.54 km haversine (+11.6%). Longitude degrees are treated as 111 km; at 37.5N they are 88 km."
